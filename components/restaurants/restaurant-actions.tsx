@@ -14,19 +14,23 @@ export function RestaurantActions({ restaurant }: { restaurant: any }) {
 
   async function handleTierChange() {
     setLoading(true);
-    await fetch(`/api/restaurants/${restaurant.id}/tier`, {
+    const res = await fetch(`/api/restaurants/${restaurant.id}/tier`, {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ tier }),
     });
+    const data = await res.json();
     setLoading(false);
+    if (!res.ok) { alert(`Error: ${data.error}`); return; }
     router.refresh();
   }
 
   async function handlePause() {
     setLoading(true);
     const ep = restaurant.subscription_status === "cancelled" ? "reactivate" : "pause";
-    await fetch(`/api/restaurants/${restaurant.id}/${ep}`, { method: "POST" });
+    const res = await fetch(`/api/restaurants/${restaurant.id}/${ep}`, { method: "POST" });
+    const data = await res.json();
     setLoading(false);
+    if (!res.ok) { alert(`Error: ${data.error}`); return; }
     router.refresh();
   }
 

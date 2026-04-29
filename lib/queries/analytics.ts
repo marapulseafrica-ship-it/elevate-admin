@@ -1,7 +1,9 @@
+import { unstable_noStore as noStore } from "next/cache";
 import { supabaseAdmin } from "../supabase";
 import { subDays, subMonths } from "date-fns";
 
 export async function getUsageAndChurn() {
+  noStore();
   const since30 = subDays(new Date(), 30).toISOString();
   const since60 = subDays(new Date(), 60).toISOString();
   const lastMonth = subMonths(new Date(), 1).toISOString();

@@ -20,19 +20,23 @@ export function RestaurantsTable({ restaurants }: { restaurants: Restaurant[] })
 
   async function changeTier(id: string, tier: string) {
     setBusyId(id);
-    await fetch(`/api/restaurants/${id}/tier`, {
+    const res = await fetch(`/api/restaurants/${id}/tier`, {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ tier }),
     });
+    const data = await res.json();
     setBusyId(null);
+    if (!res.ok) { alert(`Error: ${data.error}`); return; }
     router.refresh();
   }
 
   async function togglePause(id: string, currentStatus: string) {
     setBusyId(id);
     const endpoint = currentStatus === "cancelled" ? "reactivate" : "pause";
-    await fetch(`/api/restaurants/${id}/${endpoint}`, { method: "POST" });
+    const res = await fetch(`/api/restaurants/${id}/${endpoint}`, { method: "POST" });
+    const data = await res.json();
     setBusyId(null);
+    if (!res.ok) { alert(`Error: ${data.error}`); return; }
     router.refresh();
   }
 

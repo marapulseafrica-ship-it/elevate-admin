@@ -1,7 +1,9 @@
+import { unstable_noStore as noStore } from "next/cache";
 import { supabaseAdmin } from "../supabase";
 import { subMonths, startOfMonth, endOfMonth, format } from "date-fns";
 
 export async function getRevenueData() {
+  noStore();
   // Last 12 months of completed payments
   const since = subMonths(new Date(), 12).toISOString();
   const { data: payments } = await supabaseAdmin
@@ -55,6 +57,7 @@ export async function getRevenueData() {
 }
 
 export async function getExpenses() {
+  noStore();
   const { data } = await supabaseAdmin
     .from("elevate_expenses")
     .select("*")

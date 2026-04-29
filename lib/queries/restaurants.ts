@@ -1,6 +1,8 @@
+import { unstable_noStore as noStore } from "next/cache";
 import { supabaseAdmin } from "../supabase";
 
 export async function getAllRestaurants() {
+  noStore();
   const { data } = await supabaseAdmin
     .from("restaurants")
     .select("id, name, email, slug, subscription_tier, subscription_status, subscription_expires_at, is_active, created_at, country")
@@ -9,6 +11,7 @@ export async function getAllRestaurants() {
 }
 
 export async function getRestaurantDetail(id: string) {
+  noStore();
   const [{ data: restaurant }, { count: customerCount }, { data: campaigns }, { data: payments }, { data: notes }] = await Promise.all([
     supabaseAdmin
       .from("restaurants")
@@ -53,6 +56,7 @@ export async function getRestaurantDetail(id: string) {
 }
 
 export async function getRestaurantStats() {
+  noStore();
   const { data } = await supabaseAdmin
     .from("restaurants")
     .select("subscription_status, subscription_tier, subscription_expires_at");
