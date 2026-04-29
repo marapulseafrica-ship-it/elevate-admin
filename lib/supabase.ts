@@ -2,7 +2,6 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
 let _client: SupabaseClient | null = null;
 
-// Lazy singleton — only instantiated at request time, not at build time
 export function getSupabaseAdmin(): SupabaseClient {
   if (!_client) {
     _client = createClient(
@@ -13,9 +12,11 @@ export function getSupabaseAdmin(): SupabaseClient {
   return _client;
 }
 
-// Convenience proxy — works identically to the old export
+// Proxy that properly binds `this` so chained method calls work correctly
 export const supabaseAdmin = new Proxy({} as SupabaseClient, {
   get(_target, prop) {
-    return (getSupabaseAdmin() as any)[prop];
+    const client = getSupabaseAdmin();
+    const value = (client as any)[prop];
+    return typeof value === "function" ? value.bind(client) : value;
   },
 });
