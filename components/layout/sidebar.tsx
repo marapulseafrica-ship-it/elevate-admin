@@ -2,12 +2,13 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Building2, DollarSign, FileText, BarChart3, LogOut, ShieldCheck } from "lucide-react";
-import { createClient } from "@supabase/supabase-js";
+import { LayoutDashboard, Building2, DollarSign, FileText, BarChart3, LogOut, ShieldCheck, CreditCard } from "lucide-react";
+import { createSupabaseBrowser } from "@/lib/supabase-browser";
 
 const nav = [
   { name: "Overview",    href: "/",             icon: LayoutDashboard },
   { name: "Restaurants", href: "/restaurants",  icon: Building2 },
+  { name: "Payments",    href: "/payments",     icon: CreditCard },
   { name: "Finance",     href: "/finance",      icon: DollarSign },
   { name: "Invoices",    href: "/invoices",     icon: FileText },
   { name: "Analytics",   href: "/analytics",    icon: BarChart3 },
@@ -18,10 +19,7 @@ export function Sidebar() {
   const router = useRouter();
 
   async function handleSignOut() {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
+    const supabase = createSupabaseBrowser();
     await supabase.auth.signOut();
     router.push("/login");
   }

@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { RevenueChart } from "@/components/overview/revenue-chart";
 import { PlanDonut } from "@/components/overview/plan-donut";
 import { Building2, DollarSign, Clock, AlertTriangle } from "lucide-react";
+import Link from "next/link";
 import { format, differenceInDays } from "date-fns";
 import { formatCurrency } from "@/lib/utils";
 
@@ -82,7 +83,7 @@ export default async function OverviewPage() {
         <Card className="p-0 overflow-hidden">
           <div className="px-5 py-4 border-b flex items-center justify-between">
             <h3 className="text-sm font-semibold text-slate-700">Pending Payments</h3>
-            <Badge variant="medium">{revenue.pendingCount} pending</Badge>
+            <Link href="/payments" className="text-xs text-purple-600 hover:text-purple-800 font-medium">View all →</Link>
           </div>
           <div className="divide-y">
             {(pendingPayments ?? []).length === 0 && (
