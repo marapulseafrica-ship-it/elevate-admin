@@ -22,9 +22,17 @@ export default async function FinancePage() {
   const netProfit = revenue.totalRevenue - totalExpenses;
   const profitMargin = revenue.totalRevenue > 0 ? (netProfit / revenue.totalRevenue) * 100 : 0;
 
+  const totalSubscriptionRevenue = revenue.totalRevenue - revenue.totalSetupFees;
+
   const statCards = [
+    {
+      label: "Total Revenue",
+      value: formatCurrency(revenue.totalRevenue),
+      sub: `${formatCurrency(totalSubscriptionRevenue)} subscriptions · ${formatCurrency(revenue.totalSetupFees)} setup fees`,
+      icon: TrendingUp,
+      color: "text-purple-500",
+    },
     { label: "MRR", value: formatCurrency(revenue.mrr), sub: "subscription revenue this month", icon: DollarSign, color: "text-green-500" },
-    { label: "ARR", value: formatCurrency(revenue.arr), sub: "annualised subscriptions", icon: TrendingUp, color: "text-blue-500" },
     { label: "Setup Fees", value: formatCurrency(revenue.totalSetupFees), sub: "one-time onboarding revenue", icon: DollarSign, color: "text-amber-500" },
     { label: "Pending payments", value: revenue.pendingCount.toString(), sub: formatCurrency(revenue.pendingTotal) + " awaiting approval", icon: AlertCircle, color: "text-red-400" },
   ];
