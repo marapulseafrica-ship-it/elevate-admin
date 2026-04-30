@@ -14,7 +14,7 @@ export async function sendEmail(
   }
   try {
     const result = await resend.emails.send({
-      from: "Elevate CRM <onboarding@resend.dev>",
+      from: "Elevate CRM <support@elevateaisolutionsagency.com>",
       to,
       subject,
       html,
