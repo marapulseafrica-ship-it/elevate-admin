@@ -1,18 +1,26 @@
 import { NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase";
+import { createClient } from "@supabase/supabase-js";
+import { unstable_noStore as noStore } from "next/cache";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const { count, error } = await supabaseAdmin
+  noStore();
+
+  const client = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+
+  const { data, error } = await client
     .from("payments")
-    .select("id", { count: "exact", head: true })
+    .select("id")
     .eq("status", "pending");
 
-  const result = error ? 0 : (count ?? 0);
+  const count = error ? 0 : (data?.length ?? 0);
 
   return NextResponse.json(
-    { count: result },
-    { headers: { "Cache-Control": "no-store, no-cache, must-revalidate" } }
+    { count },
+    { headers: { "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0" } }
   );
 }
