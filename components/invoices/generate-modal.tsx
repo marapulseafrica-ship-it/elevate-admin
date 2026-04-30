@@ -2,6 +2,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
+import { createInvoice } from "@/app/actions/invoices";
+import { toast } from "sonner";
 
 const PLANS = ["starter", "basic", "pro", "premium"];
 const PLAN_PRICES: Record<string, number> = { starter: 15, basic: 25, pro: 45, premium: 80 };
@@ -39,30 +41,19 @@ export function GenerateModal({ restaurants }: { restaurants: { id: string; name
     setError(null);
 
     try {
-      const res = await fetch("/api/invoices", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          restaurantId: form.restaurantId,
-          plan: form.plan,
-          amount_usd: parseFloat(form.amount_usd),
-          amount_zmw: form.amount_zmw ? parseFloat(form.amount_zmw) : undefined,
-          notes: form.notes || undefined,
-          due_at: form.due_at || undefined,
-        }),
+      const invoiceNumber = await createInvoice({
+        restaurantId: form.restaurantId,
+        plan: form.plan,
+        amount_usd: parseFloat(form.amount_usd),
+        amount_zmw: form.amount_zmw ? parseFloat(form.amount_zmw) : undefined,
+        notes: form.notes || undefined,
+        due_at: form.due_at || undefined,
       });
-
-      const json = await res.json();
-      if (!res.ok) {
-        setError(json.error ?? "Failed to generate invoice. Please try again.");
-        setSaving(false);
-        return;
-      }
-
+      toast.success(`Invoice ${invoiceNumber} created`);
       handleClose();
       window.location.reload();
-    } catch {
-      setError("Network error. Please try again.");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to generate invoice. Please try again.");
       setSaving(false);
     }
   }

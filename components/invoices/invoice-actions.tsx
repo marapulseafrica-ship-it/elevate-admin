@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Eye, Download, Send, CheckCircle, Loader2, Receipt } from "lucide-react";
 import { toast } from "sonner";
+import { markInvoicePaid } from "@/app/actions/invoices";
 
 export function InvoiceActions({
   invoiceId,
@@ -19,11 +20,11 @@ export function InvoiceActions({
     setLoading("send");
     try {
       const res = await fetch(`/api/invoices/${invoiceId}/send`, { method: "POST" });
+      const j = await res.json();
       if (res.ok) {
         toast.success("Invoice sent to restaurant");
         window.location.reload();
       } else {
-        const j = await res.json();
         toast.error(j.error ?? "Failed to send invoice");
       }
     } catch {
@@ -35,16 +36,11 @@ export function InvoiceActions({
   async function handlePaid() {
     setLoading("paid");
     try {
-      const res = await fetch(`/api/invoices/${invoiceId}/paid`, { method: "POST" });
-      if (res.ok) {
-        toast.success("Invoice marked as paid");
-        window.location.reload();
-      } else {
-        const j = await res.json();
-        toast.error(j.error ?? "Failed to mark as paid");
-      }
-    } catch {
-      toast.error("Network error — please try again");
+      await markInvoicePaid(invoiceId);
+      toast.success("Invoice marked as paid ✓");
+      window.location.reload();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to mark as paid");
     }
     setLoading(null);
   }
