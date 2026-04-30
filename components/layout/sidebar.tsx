@@ -4,7 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard, Building2, DollarSign, FileText, BarChart3,
-  LogOut, ShieldCheck, CreditCard, Bell, BellOff, BellRing,
+  LogOut, ShieldCheck, CreditCard, Bell, BellOff, BellRing, Users,
 } from "lucide-react";
 import { createSupabaseBrowser } from "@/lib/supabase-browser";
 import { useEffect, useRef, useState, useCallback } from "react";
@@ -15,6 +15,7 @@ export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const [pendingCount, setPendingCount] = useState(0);
+  const [newLeadsCount, setNewLeadsCount] = useState(0);
   const [permission, setPermission] = useState<NotificationPermission>("default");
   const [enabled, setEnabled] = useState(false);
 
@@ -36,6 +37,12 @@ export function Sidebar() {
 
   const fetchCount = useCallback(async () => {
     try {
+      // Fetch leads count in parallel
+      fetch(`/api/leads/new-count?t=${Date.now()}`, { cache: "no-store" })
+        .then(r => r.json())
+        .then(({ count }) => setNewLeadsCount(count ?? 0))
+        .catch(() => {});
+
       const res = await fetch(`/api/payments/pending-count?t=${Date.now()}`, { cache: "no-store" });
       if (!res.ok) return;
       const { count } = await res.json() as { count: number };
@@ -99,6 +106,7 @@ export function Sidebar() {
     { name: "Overview",    href: "/",            icon: LayoutDashboard, badge: 0 },
     { name: "Restaurants", href: "/restaurants", icon: Building2,       badge: 0 },
     { name: "Payments",    href: "/payments",    icon: CreditCard,      badge: pendingCount },
+    { name: "Leads",       href: "/leads",       icon: Users,           badge: newLeadsCount },
     { name: "Finance",     href: "/finance",     icon: DollarSign,      badge: 0 },
     { name: "Invoices",    href: "/invoices",    icon: FileText,        badge: 0 },
     { name: "Analytics",   href: "/analytics",   icon: BarChart3,       badge: 0 },
