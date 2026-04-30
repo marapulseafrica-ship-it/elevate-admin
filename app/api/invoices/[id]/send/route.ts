@@ -18,7 +18,8 @@ export async function POST(_req: NextRequest, { params }: { params: { id: string
 
   if (error || !invoice) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  const restaurant = (invoice as any).restaurants;
+  const linked = (invoice as any).restaurants;
+  const restaurant = linked ?? { name: invoice.client_name ?? "Client", email: invoice.client_email ?? "" };
   const zmwRate = Number(process.env.NEXT_PUBLIC_ZMW_PER_USD ?? 27);
   const zmw = invoice.amount_zmw ?? invoice.amount_usd * zmwRate;
 

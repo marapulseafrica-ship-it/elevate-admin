@@ -32,19 +32,27 @@ export async function sendInvoice(invoiceId: string) {
 }
 
 export async function createInvoice(payload: {
-  restaurantId: string;
+  restaurantId?: string;
+  clientName?: string;
+  clientEmail?: string;
   plan: string;
   amount_usd: number;
   amount_zmw?: number;
   notes?: string;
   due_at?: string;
 }) {
+  if (!payload.restaurantId && !payload.clientName) {
+    throw new Error("Either select a restaurant or enter a client name.");
+  }
+
   const invoice_number = await generateInvoiceNumber();
 
   const { error } = await db()
     .from("elevate_invoices")
     .insert({
-      restaurant_id: payload.restaurantId,
+      restaurant_id: payload.restaurantId ?? null,
+      client_name: payload.clientName ?? null,
+      client_email: payload.clientEmail ?? null,
       invoice_number,
       plan: payload.plan,
       amount_usd: payload.amount_usd,

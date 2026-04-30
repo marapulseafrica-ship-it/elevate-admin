@@ -70,8 +70,8 @@ export default async function InvoicesPage() {
                   <tr key={inv.id} className="border-b last:border-0 hover:bg-slate-50">
                     <td className="px-5 py-3 text-sm font-mono text-purple-700 font-semibold">{inv.invoice_number}</td>
                     <td className="px-5 py-3">
-                      <div className="text-sm font-medium text-slate-800">{rest?.name}</div>
-                      <div className="text-xs text-slate-400">{rest?.email}</div>
+                      <div className="text-sm font-medium text-slate-800">{rest?.name ?? inv.client_name ?? "—"}</div>
+                      <div className="text-xs text-slate-400">{rest?.email ?? inv.client_email ?? ""}</div>
                     </td>
                     <td className="px-5 py-3 text-sm capitalize text-slate-600">{inv.plan}</td>
                     <td className="px-5 py-3">
