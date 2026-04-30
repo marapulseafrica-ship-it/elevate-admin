@@ -17,12 +17,12 @@ export function PaymentsTable({ payments }: { payments: any[] }) {
     const data = await res.json();
     setBusy(null);
     if (!res.ok) { alert(`Error: ${data.error}`); return; }
-    router.refresh();
+    window.location.reload();
   }
 
   async function handleReject(id: string) {
     setBusy(id);
-    await fetch(`/api/payments/${id}/reject`, {
+    const res = await fetch(`/api/payments/${id}/reject`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ reason: rejectReason || "Payment could not be verified." }),
@@ -30,7 +30,8 @@ export function PaymentsTable({ payments }: { payments: any[] }) {
     setBusy(null);
     setRejectId(null);
     setRejectReason("");
-    router.refresh();
+    if (!res.ok) { alert("Reject failed, please try again."); return; }
+    window.location.reload();
   }
 
   if (payments.length === 0) {
