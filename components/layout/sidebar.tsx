@@ -4,6 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { LayoutDashboard, Building2, DollarSign, FileText, BarChart3, LogOut, ShieldCheck, CreditCard } from "lucide-react";
 import { createSupabaseBrowser } from "@/lib/supabase-browser";
+import { PaymentNotifier } from "@/components/notifications/payment-notifier";
 
 const nav = [
   { name: "Overview",    href: "/",             icon: LayoutDashboard },
@@ -58,7 +59,8 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="p-3 border-t border-slate-800">
+      <div className="p-3 border-t border-slate-800 space-y-2">
+        <PaymentNotifier />
         <button
           onClick={handleSignOut}
           className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 w-full transition-colors"

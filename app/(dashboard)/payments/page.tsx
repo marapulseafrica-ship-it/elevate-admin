@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic';
 
+import { unstable_noStore as noStore } from "next/cache";
 import { supabaseAdmin } from "@/lib/supabase";
 import { Card } from "@/components/ui/card";
 import { PaymentsTable } from "@/components/payments/payments-table";
@@ -7,6 +8,7 @@ import { RecentPaymentsTable } from "@/components/payments/recent-payments-table
 import { Clock, CheckCircle } from "lucide-react";
 
 async function getPayments() {
+  noStore();
   const [{ data: pending }, { data: recent }] = await Promise.all([
     supabaseAdmin
       .from("payments")
