@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { createSupabaseBrowser } from "@/lib/supabase-browser";
 import { ShieldCheck, Loader2 } from "lucide-react";
 
-const SUPER_ADMIN_EMAIL = process.env.NEXT_PUBLIC_SUPER_ADMIN_EMAIL ?? "elevatealsolutionsagency@gmail.com";
+const SUPER_ADMIN_EMAIL = process.env.NEXT_PUBLIC_SUPER_ADMIN_EMAIL ?? "danielkimara7@gmail.com";
 
 export default function LoginPage() {
   const router = useRouter();
