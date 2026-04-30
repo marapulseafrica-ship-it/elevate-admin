@@ -36,7 +36,7 @@ export function Sidebar() {
 
   const fetchCount = useCallback(async () => {
     try {
-      const res = await fetch("/api/payments/pending-count", { cache: "no-store" });
+      const res = await fetch(`/api/payments/pending-count?t=${Date.now()}`, { cache: "no-store" });
       if (!res.ok) return;
       const { count } = await res.json() as { count: number };
 
