@@ -2,8 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { InvoicePDF } from "@/components/invoices/invoice-pdf";
+import { unstable_noStore } from "next/cache";
 
 export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
+  unstable_noStore();
+
   const client = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -32,6 +35,7 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
     headers: {
       "Content-Type": "application/pdf",
       "Content-Disposition": `inline; filename="${receiptNumber}.pdf"`,
+      "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
     },
   });
 }

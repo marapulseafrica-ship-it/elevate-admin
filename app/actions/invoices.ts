@@ -11,12 +11,14 @@ function db() {
 }
 
 export async function markInvoicePaid(invoiceId: string) {
-  const { error } = await db()
+  const { data, error } = await db()
     .from("elevate_invoices")
     .update({ status: "paid", paid_at: new Date().toISOString() })
-    .eq("id", invoiceId);
+    .eq("id", invoiceId)
+    .select("id");
 
   if (error) throw new Error(error.message);
+  if (!data || data.length === 0) throw new Error(`No invoice found with id ${invoiceId}`);
   revalidatePath("/invoices");
 }
 
