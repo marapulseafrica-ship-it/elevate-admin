@@ -5,8 +5,11 @@ import { X } from "lucide-react";
 import { createInvoice } from "@/app/actions/invoices";
 import { toast } from "sonner";
 
-const PLANS = ["starter", "basic", "pro", "premium"];
-const PLAN_PRICES: Record<string, number> = { starter: 15, basic: 25, pro: 45, premium: 80 };
+const PLANS = ["starter", "basic", "pro", "premium", "setup_fee"];
+const PLAN_PRICES: Record<string, number> = { starter: 15, basic: 25, pro: 45, premium: 80, setup_fee: 50 };
+const PLAN_LABELS: Record<string, string> = {
+  starter: "Starter", basic: "Basic", pro: "Pro", premium: "Premium", setup_fee: "Setup Fee (one-time)",
+};
 const ZMW_RATE = Number(process.env.NEXT_PUBLIC_ZMW_PER_USD ?? 27);
 
 export function GenerateModal({ restaurants }: { restaurants: { id: string; name: string; email: string }[] }) {
@@ -99,7 +102,7 @@ export function GenerateModal({ restaurants }: { restaurants: { id: string; name
                 className="w-full border rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-purple-400"
               >
                 {PLANS.map((p) => (
-                  <option key={p} value={p}>{p.charAt(0).toUpperCase() + p.slice(1)}</option>
+                  <option key={p} value={p}>{PLAN_LABELS[p] ?? p}</option>
                 ))}
               </select>
             </div>

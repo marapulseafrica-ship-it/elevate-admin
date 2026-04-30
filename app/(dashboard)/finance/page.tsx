@@ -23,10 +23,10 @@ export default async function FinancePage() {
   const profitMargin = revenue.totalRevenue > 0 ? (netProfit / revenue.totalRevenue) * 100 : 0;
 
   const statCards = [
-    { label: "MRR", value: formatCurrency(revenue.mrr), sub: "this month's revenue", icon: DollarSign, color: "text-green-500" },
-    { label: "ARR", value: formatCurrency(revenue.arr), sub: "annualised", icon: TrendingUp, color: "text-blue-500" },
-    { label: "Expenses (this month)", value: formatCurrency(thisMonthExpenses), sub: `Total: ${formatCurrency(totalExpenses)}`, icon: TrendingDown, color: "text-red-400" },
-    { label: "Pending payments", value: revenue.pendingCount.toString(), sub: formatCurrency(revenue.pendingTotal) + " awaiting approval", icon: AlertCircle, color: "text-amber-500" },
+    { label: "MRR", value: formatCurrency(revenue.mrr), sub: "subscription revenue this month", icon: DollarSign, color: "text-green-500" },
+    { label: "ARR", value: formatCurrency(revenue.arr), sub: "annualised subscriptions", icon: TrendingUp, color: "text-blue-500" },
+    { label: "Setup Fees", value: formatCurrency(revenue.totalSetupFees), sub: "one-time onboarding revenue", icon: DollarSign, color: "text-amber-500" },
+    { label: "Pending payments", value: revenue.pendingCount.toString(), sub: formatCurrency(revenue.pendingTotal) + " awaiting approval", icon: AlertCircle, color: "text-red-400" },
   ];
 
   return (
@@ -56,7 +56,7 @@ export default async function FinancePage() {
           <div className="space-y-3">
             {Object.entries(revenue.tierRevenue).map(([tier, amount]) => (
               <div key={tier} className="flex items-center justify-between">
-                <span className="text-sm capitalize text-slate-600">{tier}</span>
+                <span className="text-sm text-slate-600">{tier === "setup_fee" ? "Setup Fee" : tier.charAt(0).toUpperCase() + tier.slice(1)}</span>
                 <div className="flex items-center gap-3">
                   <div className="w-24 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                     <div

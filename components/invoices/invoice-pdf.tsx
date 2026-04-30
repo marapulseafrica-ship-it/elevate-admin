@@ -125,7 +125,9 @@ export function InvoicePDF({ invoice, restaurant, zmwRate = 27, type = "invoice"
           </View>
           <View style={styles.tableRow}>
             <Text style={[styles.col1, { fontSize: 11 }]}>
-              {invoice.plan.charAt(0).toUpperCase() + invoice.plan.slice(1)} Plan — Monthly Subscription
+              {invoice.plan === "setup_fee"
+                ? "Setup Fee — One-time Onboarding Payment"
+                : `${invoice.plan.charAt(0).toUpperCase() + invoice.plan.slice(1)} Plan — Monthly Subscription`}
             </Text>
             <Text style={[styles.col2, { fontSize: 11 }]}>${invoice.amount_usd.toFixed(2)}</Text>
             <Text style={[styles.col3, { fontSize: 11 }]}>ZMW {zmw.toFixed(0)}</Text>
