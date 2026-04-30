@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Eye, Download, Send, CheckCircle, Loader2, Receipt } from "lucide-react";
+import { toast } from "sonner";
 
 export function InvoiceActions({
   invoiceId,
@@ -16,27 +17,46 @@ export function InvoiceActions({
 
   async function handleSend() {
     setLoading("send");
-    const res = await fetch(`/api/invoices/${invoiceId}/send`, { method: "POST" });
+    try {
+      const res = await fetch(`/api/invoices/${invoiceId}/send`, { method: "POST" });
+      if (res.ok) {
+        toast.success("Invoice sent to restaurant");
+        window.location.reload();
+      } else {
+        const j = await res.json();
+        toast.error(j.error ?? "Failed to send invoice");
+      }
+    } catch {
+      toast.error("Network error — please try again");
+    }
     setLoading(null);
-    if (res.ok) window.location.reload();
   }
 
   async function handlePaid() {
     setLoading("paid");
-    const res = await fetch(`/api/invoices/${invoiceId}/paid`, { method: "POST" });
+    try {
+      const res = await fetch(`/api/invoices/${invoiceId}/paid`, { method: "POST" });
+      if (res.ok) {
+        toast.success("Invoice marked as paid");
+        window.location.reload();
+      } else {
+        const j = await res.json();
+        toast.error(j.error ?? "Failed to mark as paid");
+      }
+    } catch {
+      toast.error("Network error — please try again");
+    }
     setLoading(null);
-    if (res.ok) window.location.reload();
   }
 
   return (
     <div className="flex items-center gap-1">
-      {/* View / Download — always available */}
       <a
         href={`/api/invoices/${invoiceId}/pdf`}
         target="_blank"
         rel="noopener noreferrer"
         className="p-1.5 text-slate-400 hover:text-purple-600 transition-colors"
-        title="Preview invoice PDF"
+        title="Preview invoice"
       >
         <Eye className="w-4 h-4" />
       </a>
@@ -44,24 +64,22 @@ export function InvoiceActions({
         href={`/api/invoices/${invoiceId}/pdf`}
         download={`${invoiceNumber}.pdf`}
         className="p-1.5 text-slate-400 hover:text-purple-600 transition-colors"
-        title="Download invoice PDF"
+        title="Download invoice"
       >
         <Download className="w-4 h-4" />
       </a>
 
-      {/* Send — only if not paid */}
       {status !== "paid" && (
         <button
           onClick={handleSend}
           disabled={!!loading}
           className="p-1.5 text-slate-400 hover:text-blue-600 transition-colors disabled:opacity-50"
-          title="Send invoice to restaurant"
+          title="Send to restaurant"
         >
           {loading === "send" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
         </button>
       )}
 
-      {/* Mark paid — only if not paid */}
       {status !== "paid" && (
         <button
           onClick={handlePaid}
@@ -73,7 +91,6 @@ export function InvoiceActions({
         </button>
       )}
 
-      {/* Receipt — only once paid */}
       {status === "paid" && (
         <>
           <a

@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase";
+import { createClient } from "@supabase/supabase-js";
 
 export async function POST(_req: NextRequest, { params }: { params: { id: string } }) {
-  await supabaseAdmin
+  const client = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+
+  const { error } = await client
     .from("elevate_invoices")
     .update({ status: "paid", paid_at: new Date().toISOString() })
     .eq("id", params.id);
 
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ success: true });
 }

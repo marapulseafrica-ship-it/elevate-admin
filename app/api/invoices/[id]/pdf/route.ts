@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase";
+import { createClient } from "@supabase/supabase-js";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { InvoicePDF } from "@/components/invoices/invoice-pdf";
 
 export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
-  const { data: invoice, error } = await supabaseAdmin
+  const client = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+
+  const { data: invoice, error } = await client
     .from("elevate_invoices")
     .select("*, restaurants(name, email, country)")
     .eq("id", params.id)
@@ -15,7 +20,6 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   const restaurant = (invoice as any).restaurants;
   const zmwRate = Number(process.env.NEXT_PUBLIC_ZMW_PER_USD ?? 27);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const pdfBuffer = await renderToBuffer(InvoicePDF({ invoice, restaurant, zmwRate }) as any);
 
   return new NextResponse(pdfBuffer as unknown as BodyInit, {
