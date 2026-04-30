@@ -27,6 +27,15 @@ const styles = StyleSheet.create({
   footerTitle: { fontSize: 10, fontFamily: "Helvetica-Bold", color: "#7c3aed", marginBottom: 6 },
   footerText: { fontSize: 9, color: "#64748b", lineHeight: 1.6 },
   thankYou: { textAlign: "center", marginTop: 40, fontSize: 10, color: "#94a3b8" },
+  receiptBanner: {
+    backgroundColor: "#f0fdf4",
+    borderRadius: 6,
+    padding: "10 16",
+    marginBottom: 24,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  receiptBannerText: { fontSize: 11, color: "#16a34a", fontFamily: "Helvetica-Bold" },
 });
 
 interface InvoicePDFProps {
@@ -34,6 +43,7 @@ interface InvoicePDFProps {
     invoice_number: string;
     issued_at: string;
     due_at?: string | null;
+    paid_at?: string | null;
     plan: string;
     amount_usd: number;
     amount_zmw?: number | null;
@@ -45,14 +55,23 @@ interface InvoicePDFProps {
     country?: string | null;
   };
   zmwRate?: number;
+  type?: "invoice" | "receipt";
 }
 
-export function InvoicePDF({ invoice, restaurant, zmwRate = 27 }: InvoicePDFProps) {
+export function InvoicePDF({ invoice, restaurant, zmwRate = 27, type = "invoice" }: InvoicePDFProps) {
+  const isReceipt = type === "receipt";
   const zmw = invoice.amount_zmw ?? invoice.amount_usd * zmwRate;
   const issuedDate = new Date(invoice.issued_at).toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" });
   const dueDate = invoice.due_at
     ? new Date(invoice.due_at).toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" })
     : "Upon receipt";
+  const paidDate = invoice.paid_at
+    ? new Date(invoice.paid_at).toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" })
+    : new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" });
+
+  const docNumber = isReceipt
+    ? invoice.invoice_number.replace("INV-", "REC-")
+    : invoice.invoice_number;
 
   return (
     <Document>
@@ -64,18 +83,34 @@ export function InvoicePDF({ invoice, restaurant, zmwRate = 27 }: InvoicePDFProp
             <Text style={styles.brandSub}>Restaurant Marketing Platform</Text>
           </View>
           <View style={styles.invoiceMeta}>
-            <Text style={styles.metaLabel}>INVOICE</Text>
-            <Text style={styles.metaValue}>{invoice.invoice_number}</Text>
-            <Text style={[styles.metaLabel, { marginTop: 8 }]}>Issued</Text>
+            <Text style={styles.metaLabel}>{isReceipt ? "RECEIPT" : "INVOICE"}</Text>
+            <Text style={styles.metaValue}>{docNumber}</Text>
+            <Text style={[styles.metaLabel, { marginTop: 8 }]}>Date</Text>
             <Text style={{ fontSize: 10, marginTop: 2 }}>{issuedDate}</Text>
-            <Text style={[styles.metaLabel, { marginTop: 6 }]}>Due</Text>
-            <Text style={{ fontSize: 10, marginTop: 2 }}>{dueDate}</Text>
+            {isReceipt ? (
+              <>
+                <Text style={[styles.metaLabel, { marginTop: 6 }]}>Payment Received</Text>
+                <Text style={{ fontSize: 10, marginTop: 2 }}>{paidDate}</Text>
+              </>
+            ) : (
+              <>
+                <Text style={[styles.metaLabel, { marginTop: 6 }]}>Due</Text>
+                <Text style={{ fontSize: 10, marginTop: 2 }}>{dueDate}</Text>
+              </>
+            )}
           </View>
         </View>
 
+        {/* Receipt paid banner */}
+        {isReceipt && (
+          <View style={styles.receiptBanner}>
+            <Text style={styles.receiptBannerText}>✓  Payment received — Thank you!</Text>
+          </View>
+        )}
+
         {/* Bill To */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Bill To</Text>
+          <Text style={styles.sectionTitle}>{isReceipt ? "Receipt For" : "Bill To"}</Text>
           <Text style={styles.billTo}>{restaurant.name}</Text>
           <Text style={styles.billEmail}>{restaurant.email}</Text>
           {restaurant.country && <Text style={[styles.billEmail, { marginTop: 2 }]}>{restaurant.country}</Text>}
@@ -100,7 +135,7 @@ export function InvoicePDF({ invoice, restaurant, zmwRate = 27 }: InvoicePDFProp
         {/* Total */}
         <View style={styles.divider} />
         <View style={styles.totalRow}>
-          <Text style={styles.totalLabel}>Total Due</Text>
+          <Text style={styles.totalLabel}>{isReceipt ? "Amount Paid" : "Total Due"}</Text>
           <Text style={styles.totalValue}>ZMW {zmw.toFixed(0)}</Text>
         </View>
 
@@ -112,17 +147,23 @@ export function InvoicePDF({ invoice, restaurant, zmwRate = 27 }: InvoicePDFProp
           </View>
         )}
 
-        {/* Payment instructions */}
-        <View style={styles.footer}>
-          <Text style={styles.footerTitle}>Payment Instructions</Text>
-          <Text style={styles.footerText}>
-            Please send payment via Airtel Money to: +260 978 350 824{"\n"}
-            Use your company name or invoice number as the reference.{"\n"}
-            After payment, send your transaction ID to: elevatalsolutionsagency@gmail.com
-          </Text>
-        </View>
+        {/* Payment instructions — only on invoice */}
+        {!isReceipt && (
+          <View style={styles.footer}>
+            <Text style={styles.footerTitle}>Payment Instructions</Text>
+            <Text style={styles.footerText}>
+              Please send payment via Airtel Money to: +260 978 350 824{"\n"}
+              Use your company name or invoice number as the reference.{"\n"}
+              After payment, send your transaction ID to: support@elevateaisolutionsagency.com
+            </Text>
+          </View>
+        )}
 
-        <Text style={styles.thankYou}>Thank you for your business — Elevate CRM</Text>
+        <Text style={styles.thankYou}>
+          {isReceipt
+            ? "This receipt confirms payment has been received — Elevate CRM"
+            : "Thank you for your business — Elevate CRM"}
+        </Text>
       </Page>
     </Document>
   );
