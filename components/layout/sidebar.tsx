@@ -7,7 +7,7 @@ import {
   LogOut, ShieldCheck, CreditCard, Bell, BellOff, BellRing,
 } from "lucide-react";
 import { createSupabaseBrowser } from "@/lib/supabase-browser";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 
 const NOTIF_PREF_KEY = "elevate_notif_enabled";
 
@@ -16,94 +16,68 @@ export function Sidebar() {
   const router = useRouter();
   const [pendingCount, setPendingCount] = useState(0);
   const [permission, setPermission] = useState<NotificationPermission>("default");
-  const [enabled, setEnabled] = useState(false); // local mute/unmute toggle
+  const [enabled, setEnabled] = useState(false);
 
   const prevCount = useRef<number | null>(null);
-  const enabledRef = useRef(false); // ref so SSE callback always reads latest
+  const enabledRef = useRef(false);
 
-  // Sync ref with state
-  useEffect(() => {
-    enabledRef.current = enabled;
-  }, [enabled]);
+  useEffect(() => { enabledRef.current = enabled; }, [enabled]);
 
-  // Load initial permission + preference
+  // Load permission + stored preference on mount
   useEffect(() => {
     if (typeof Notification === "undefined") return;
     const perm = Notification.permission;
     setPermission(perm);
     if (perm === "granted") {
       const stored = localStorage.getItem(NOTIF_PREF_KEY);
-      const isOn = stored === null ? true : stored === "true"; // default on if already granted
-      setEnabled(isOn);
+      setEnabled(stored === null ? true : stored === "true");
     }
   }, []);
 
-  // SSE with auto-reconnect on error
-  useEffect(() => {
-    let es: EventSource;
-    let reconnectTimer: ReturnType<typeof setTimeout>;
-    let alive = true;
+  const fetchCount = useCallback(async () => {
+    try {
+      const res = await fetch("/api/payments/pending-count", { cache: "no-store" });
+      if (!res.ok) return;
+      const { count } = await res.json() as { count: number };
 
-    function connect() {
-      if (!alive) return;
-      es = new EventSource("/api/payments/stream");
+      setPendingCount(count);
 
-      es.onmessage = (e) => {
-        try {
-          const { count } = JSON.parse(e.data) as { count: number };
-          setPendingCount(count);
-
-          if (
-            prevCount.current !== null &&
-            count > prevCount.current &&
-            enabledRef.current &&
-            typeof Notification !== "undefined" &&
-            Notification.permission === "granted"
-          ) {
-            const diff = count - prevCount.current;
-            new Notification("New Payment Request — Elevate Admin", {
-              body: `${diff} new payment${diff > 1 ? "s" : ""} waiting for your approval.`,
-              icon: "/favicon.ico",
-              // no tag — so each new batch shows its own notification
-            });
-          }
-          prevCount.current = count;
-        } catch {}
-      };
-
-      es.onerror = () => {
-        es.close();
-        if (alive) reconnectTimer = setTimeout(connect, 5000);
-      };
-    }
-
-    connect();
-
-    return () => {
-      alive = false;
-      clearTimeout(reconnectTimer);
-      es?.close();
-    };
-  }, []);
-
-  async function handleEnable() {
-    if (typeof Notification === "undefined") return;
-
-    if (permission === "default") {
-      const result = await Notification.requestPermission();
-      setPermission(result);
-      if (result === "granted") {
-        setEnabled(true);
-        localStorage.setItem(NOTIF_PREF_KEY, "true");
-        new Notification("Elevate Admin — Notifications enabled", {
-          body: "You'll be alerted instantly when new payments arrive.",
+      if (
+        prevCount.current !== null &&
+        count > prevCount.current &&
+        enabledRef.current &&
+        typeof Notification !== "undefined" &&
+        Notification.permission === "granted"
+      ) {
+        const diff = count - prevCount.current;
+        new Notification("New Payment Request — Elevate Admin", {
+          body: `${diff} new payment${diff > 1 ? "s" : ""} waiting for your approval.`,
           icon: "/favicon.ico",
         });
       }
-    } else if (permission === "granted") {
+
+      prevCount.current = count;
+    } catch {}
+  }, []);
+
+  // Poll every 5 seconds — reliable on Vercel serverless
+  useEffect(() => {
+    fetchCount(); // immediate on mount
+    const timer = setInterval(fetchCount, 5000);
+    return () => clearInterval(timer);
+  }, [fetchCount]);
+
+  async function handleEnable() {
+    if (typeof Notification === "undefined") return;
+    let perm = permission;
+    if (perm === "default") {
+      perm = await Notification.requestPermission();
+      setPermission(perm);
+    }
+    if (perm === "granted") {
       setEnabled(true);
       localStorage.setItem(NOTIF_PREF_KEY, "true");
-      new Notification("Elevate Admin — Notifications enabled", {
+      new Notification("Elevate Admin — Notifications enabled ✓", {
         body: "You'll be alerted instantly when new payments arrive.",
         icon: "/favicon.ico",
       });
@@ -135,11 +109,10 @@ export function Sidebar() {
       return (
         <div className="flex items-center gap-1.5 text-xs text-slate-500 px-3 py-1.5 rounded-lg bg-slate-800">
           <BellOff className="w-3.5 h-3.5" />
-          <span>Blocked — allow in browser settings</span>
+          Blocked — allow in browser settings
         </div>
       );
     }
-
     if (permission === "granted" && enabled) {
       return (
         <button
@@ -153,7 +126,6 @@ export function Sidebar() {
         </button>
       );
     }
-
     return (
       <button
         onClick={handleEnable}
