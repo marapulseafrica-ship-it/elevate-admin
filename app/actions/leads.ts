@@ -51,11 +51,21 @@ function db() {
 }
 
 const STATUS_CYCLE: Record<string, string> = {
-  new: "contacted",
+  new:       "contacted",
   contacted: "booked",
-  booked: "closed",
-  closed: "new",
+  booked:    "won",
+  won:       "new",
+  lost:      "new",
 };
+
+export async function markLeadLost(id: string) {
+  const { error } = await db()
+    .from("elevate_leads")
+    .update({ status: "lost" })
+    .eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/leads");
+}
 
 export async function replyToLead(id: string, replyMessage: string) {
   const supabase = db();

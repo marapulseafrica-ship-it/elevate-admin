@@ -1,14 +1,23 @@
 "use client";
 import { useState, useTransition } from "react";
 import { format } from "date-fns";
-import { X, Calendar, Clock, Building2, Mail, Phone, Tag, MessageSquare, Target, Send, Loader2 } from "lucide-react";
-import { cycleLeadStatus, replyToLead } from "@/app/actions/leads";
+import { X, Calendar, Clock, Building2, Mail, Phone, Tag, MessageSquare, Target, Send, Loader2, ThumbsDown } from "lucide-react";
+import { cycleLeadStatus, markLeadLost, replyToLead } from "@/app/actions/leads";
 
 const STATUS_STYLE: Record<string, string> = {
   new:       "bg-blue-100 text-blue-700",
   contacted: "bg-amber-100 text-amber-700",
-  booked:    "bg-green-100 text-green-700",
-  closed:    "bg-slate-100 text-slate-500",
+  booked:    "bg-purple-100 text-purple-700",
+  won:       "bg-green-100 text-green-700",
+  lost:      "bg-red-100 text-red-600",
+};
+
+const STATUS_LABEL: Record<string, string> = {
+  new:       "New",
+  contacted: "Contacted",
+  booked:    "Appt. Scheduled",
+  won:       "Closed Won",
+  lost:      "Closed Lost",
 };
 
 const TYPE_STYLE: Record<string, string> = {
@@ -39,14 +48,28 @@ function Field({ icon, label, value }: { icon: React.ReactNode; label: string; v
 
 function StatusButton({ id, status }: { id: string; status: string }) {
   const [isPending, startTransition] = useTransition();
+  const [isLostPending, startLost] = useTransition();
+  const showLostBtn = !["won", "lost", "new"].includes(status);
   return (
-    <button
-      disabled={isPending}
-      onClick={() => startTransition(() => cycleLeadStatus(id, status))}
-      className={`text-xs font-semibold px-2.5 py-1 rounded-full capitalize transition-opacity ${STATUS_STYLE[status] ?? ""} ${isPending ? "opacity-50" : "hover:opacity-80 cursor-pointer"}`}
-    >
-      {status}
-    </button>
+    <div className="flex items-center gap-1.5">
+      <button
+        disabled={isPending}
+        onClick={() => startTransition(() => cycleLeadStatus(id, status))}
+        className={`text-xs font-semibold px-2.5 py-1 rounded-full transition-opacity ${STATUS_STYLE[status] ?? ""} ${isPending ? "opacity-50" : "hover:opacity-80 cursor-pointer"}`}
+      >
+        {STATUS_LABEL[status] ?? status}
+      </button>
+      {showLostBtn && (
+        <button
+          disabled={isLostPending}
+          onClick={() => startLost(() => markLeadLost(id))}
+          title="Mark as Closed Lost"
+          className={`p-1 rounded-full text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors ${isLostPending ? "opacity-50" : ""}`}
+        >
+          <ThumbsDown className="w-3.5 h-3.5" />
+        </button>
+      )}
+    </div>
   );
 }
 
@@ -140,7 +163,7 @@ export function LeadsTable({ leads }: { leads: Lead[] }) {
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <h2 className="text-lg font-bold text-slate-800">{selected.name}</h2>
-                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full capitalize ${STATUS_STYLE[selected.status] ?? ""}`}>{selected.status}</span>
+                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${STATUS_STYLE[selected.status] ?? ""}`}>{STATUS_LABEL[selected.status] ?? selected.status}</span>
                 </div>
                 <p className="text-xs text-slate-400">
                   {selected.type === "booking" ? "Booking" : "Inquiry"} · {format(new Date(selected.created_at), "d MMM yyyy, h:mm a")}
