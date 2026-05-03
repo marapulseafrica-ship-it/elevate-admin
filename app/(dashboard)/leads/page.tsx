@@ -4,6 +4,7 @@ import { getLeads } from "@/lib/queries/leads";
 import { Card } from "@/components/ui/card";
 import { format } from "date-fns";
 import { LeadStatusButton } from "@/components/leads/lead-status-button";
+import { ReplyModal } from "@/components/leads/reply-modal";
 
 const STATUS_STYLE: Record<string, string> = {
   new:       "bg-blue-100 text-blue-700",
@@ -42,6 +43,7 @@ export default async function LeadsPage() {
                 <th className="text-left font-medium px-5 py-3">Service / Message</th>
                 <th className="text-left font-medium px-5 py-3">Date</th>
                 <th className="text-left font-medium px-5 py-3">Status</th>
+                <th className="text-left font-medium px-5 py-3">Reply</th>
               </tr>
             </thead>
             <tbody>
@@ -78,6 +80,14 @@ export default async function LeadsPage() {
                   </td>
                   <td className="px-5 py-3">
                     <LeadStatusButton id={lead.id} status={lead.status} styleMap={STATUS_STYLE} />
+                  </td>
+                  <td className="px-5 py-3">
+                    <ReplyModal
+                      id={lead.id}
+                      name={lead.name}
+                      email={lead.email}
+                      originalMessage={lead.message}
+                    />
                   </td>
                 </tr>
               ))}
