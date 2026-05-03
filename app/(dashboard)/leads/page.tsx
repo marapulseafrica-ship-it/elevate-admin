@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { getLeads } from "@/lib/queries/leads";
 import { Card } from "@/components/ui/card";
 import { LeadsTable } from "@/components/leads/leads-table";
+import { FunnelStats } from "@/components/leads/funnel-stats";
 
 export default async function LeadsPage() {
   const leads = await getLeads();
@@ -16,6 +17,7 @@ export default async function LeadsPage() {
           {leads.length} total · {newCount} new
         </p>
       </div>
+      <FunnelStats leads={leads} />
       <Card className="p-0 overflow-hidden">
         <LeadsTable leads={leads} />
       </Card>
