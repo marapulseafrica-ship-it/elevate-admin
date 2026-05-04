@@ -18,6 +18,7 @@ const STATUS_LABEL: Record<string, string> = {
   booked:    "Appt. Scheduled",
   won:       "Closed Won",
   lost:      "Closed Lost",
+  closed:    "Closed",
 };
 
 const TYPE_STYLE: Record<string, string> = {
@@ -46,15 +47,16 @@ function Field({ icon, label, value }: { icon: React.ReactNode; label: string; v
   );
 }
 
-function StatusButton({ id, status }: { id: string; status: string }) {
+function StatusButton({ id, status, type }: { id: string; status: string; type: string }) {
   const [isPending, startTransition] = useTransition();
   const [isLostPending, startLost] = useTransition();
-  const showLostBtn = !["won", "lost", "new"].includes(status);
+  const isBooking = type === "booking";
+  const showLostBtn = isBooking && !["won", "lost", "new"].includes(status);
   return (
     <div className="flex items-center gap-1.5">
       <button
         disabled={isPending}
-        onClick={() => startTransition(() => cycleLeadStatus(id, status))}
+        onClick={() => startTransition(() => cycleLeadStatus(id, status, type))}
         className={`text-xs font-semibold px-2.5 py-1 rounded-full transition-opacity ${STATUS_STYLE[status] ?? ""} ${isPending ? "opacity-50" : "hover:opacity-80 cursor-pointer"}`}
       >
         {STATUS_LABEL[status] ?? status}
@@ -139,7 +141,7 @@ export function LeadsTable({ leads }: { leads: Lead[] }) {
                   )}
                 </td>
                 <td className="px-5 py-3 text-xs text-slate-500">{format(new Date(lead.created_at), "d MMM yyyy")}</td>
-                <td className="px-5 py-3"><StatusButton id={lead.id} status={lead.status} /></td>
+                <td className="px-5 py-3"><StatusButton id={lead.id} status={lead.status} type={lead.type} /></td>
                 <td className="px-5 py-3">
                   <button onClick={() => { setReplyTarget(lead); setReply(""); setReplyError(null); }}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-600 transition-colors">

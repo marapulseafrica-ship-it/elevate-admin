@@ -50,12 +50,17 @@ function db() {
   );
 }
 
-const STATUS_CYCLE: Record<string, string> = {
+const BOOKING_CYCLE: Record<string, string> = {
   new:       "contacted",
   contacted: "booked",
   booked:    "won",
   won:       "new",
   lost:      "new",
+};
+
+const INQUIRY_CYCLE: Record<string, string> = {
+  new:    "closed",
+  closed: "new",
 };
 
 export async function markLeadLost(id: string) {
@@ -99,8 +104,9 @@ export async function replyToLead(id: string, replyMessage: string) {
   revalidatePath("/leads");
 }
 
-export async function cycleLeadStatus(id: string, currentStatus: string) {
-  const next = STATUS_CYCLE[currentStatus] ?? "new";
+export async function cycleLeadStatus(id: string, currentStatus: string, type: string) {
+  const cycle = type === "contact" ? INQUIRY_CYCLE : BOOKING_CYCLE;
+  const next = cycle[currentStatus] ?? "new";
   const { error } = await db()
     .from("elevate_leads")
     .update({ status: next })
