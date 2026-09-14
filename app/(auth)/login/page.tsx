@@ -16,15 +16,20 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    const supabase = createSupabaseBrowser();
-    const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
-    if (authError) {
-      setError(authError.message);
+    try {
+      const supabase = createSupabaseBrowser();
+      const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
+      if (authError) {
+        setError(authError.message);
+        return;
+      }
+      router.push("/");
+      router.refresh();
+    } catch (err: any) {
+      setError(err?.message ?? "Login failed. Check Supabase env vars are set in Vercel.");
+    } finally {
       setLoading(false);
-      return;
     }
-    router.push("/");
-    router.refresh();
   }
 
   return (
