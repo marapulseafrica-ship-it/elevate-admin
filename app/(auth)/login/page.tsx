@@ -5,8 +5,6 @@ import { useRouter } from "next/navigation";
 import { createSupabaseBrowser } from "@/lib/supabase-browser";
 import { ShieldCheck, Loader2 } from "lucide-react";
 
-const SUPER_ADMIN_EMAIL = process.env.NEXT_PUBLIC_SUPER_ADMIN_EMAIL ?? "danielkimara7@gmail.com";
-
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -16,10 +14,6 @@ export default function LoginPage() {
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
-    if (email.trim().toLowerCase() !== SUPER_ADMIN_EMAIL.trim().toLowerCase()) {
-      setError("Access restricted to admin accounts only.");
-      return;
-    }
     setLoading(true);
     setError(null);
     const supabase = createSupabaseBrowser();
