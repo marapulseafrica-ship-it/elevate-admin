@@ -4,7 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard, Building2, DollarSign, FileText, BarChart3,
-  LogOut, ShieldCheck, CreditCard, Bell, BellOff, BellRing, Users,
+  LogOut, ShieldCheck, CreditCard, Bell, BellOff, BellRing, Users, Settings, Briefcase,
 } from "lucide-react";
 import { createSupabaseBrowser } from "@/lib/supabase-browser";
 import { useEffect, useRef, useState, useCallback } from "react";
@@ -109,7 +109,9 @@ export function Sidebar() {
     { name: "Leads",       href: "/leads",       icon: Users,           badge: newLeadsCount },
     { name: "Finance",     href: "/finance",     icon: DollarSign,      badge: 0 },
     { name: "Invoices",    href: "/invoices",    icon: FileText,        badge: 0 },
+    { name: "Agents",      href: "/agents",      icon: Briefcase,       badge: 0 },
     { name: "Analytics",   href: "/analytics",   icon: BarChart3,       badge: 0 },
+    { name: "Settings",    href: "/settings",    icon: Settings,        badge: 0 },
   ];
 
   function NotifButton() {
