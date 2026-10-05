@@ -18,7 +18,7 @@ export default async function AgentsPage() {
     getAllAgentPayouts(),
   ]);
 
-  const signupUrl = `${process.env.NEXT_PUBLIC_CRM_URL ?? "https://elevate-crm.vercel.app"}/agent-signup`;
+  const signupUrl = `${process.env.NEXT_PUBLIC_ADMIN_URL ?? "https://elevate-admin-1uvf.vercel.app"}/agent-signup`;
 
   return (
     <div className="p-6 space-y-6">
