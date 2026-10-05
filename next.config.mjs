@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   eslint: { ignoreDuringBuilds: true },
+  poweredByHeader: false,
   experimental: {
     outputFileTracingIncludes: {
       "/*": ["./.next/server/app/(dashboard)/**/*"],
